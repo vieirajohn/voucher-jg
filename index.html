@@ -274,6 +274,25 @@
   .badge { width: 60px; height: 60px; border: 1.5px solid #d9cfc0; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; }
   .badge span { font-size: 7px; letter-spacing: 1.5px; text-transform: uppercase; color: #b0a48a; font-weight: 300; line-height: 1.9; text-align: center; }
 
+  /* ── VOUCHER CODE ── */
+  .voucher-code-inline {
+    margin-top: 2px;
+  }
+  .voucher-code-inline .code-label {
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #b0a48a;
+    font-weight: 300;
+  }
+  .voucher-code-inline .code-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8px;
+    font-weight: 300;
+    color: #b0a48a;
+    letter-spacing: 3px;
+  }
+
   /* ── INSTALL TOAST ── */
   .toast {
     position: fixed;
@@ -348,6 +367,13 @@
     <div class="section-label">Validez</div>
     <input class="inp" type="text" value="Válido durante 6 meses" oninput="setValidez(this.value)">
 
+    <div class="section-label">Código único</div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <input class="inp" type="text" id="codeInput" readonly style="flex:1; font-family:monospace; letter-spacing:2px; text-align:center; font-size:14px; cursor:pointer;" onclick="copyCode()" title="Clic para copiar">
+      <button class="chip" onclick="generateCode()" style="white-space:nowrap; padding:8px 10px; flex-shrink:0;" title="Generar nuevo código">⟳ Nuevo</button>
+    </div>
+    <p style="font-size:7px; color:#444; letter-spacing:1px; margin-top:6px; line-height:1.6;">Código generado automáticamente · Clic en el código para copiar</p>
+
   </div>
 
   <!-- VOUCHER -->
@@ -375,6 +401,7 @@
           <p id="validezText">Válido durante 6 meses</p>
           <p>No reembolsable</p>
           <p>Canjeable en un solo uso</p>
+          <p class="voucher-code-inline"><span class="code-label">Código:</span> <span class="code-value" id="codeText">JG-XXXXXX</span></p>
         </div>
         <div class="badge"><span>Gift<br>Card</span></div>
       </div>
@@ -404,6 +431,44 @@
   function setLabel(val)   { document.getElementById('labelText').textContent = val; }
   function setSubtitle(val){ document.getElementById('subtitleText').textContent = val; }
   function setValidez(val) { document.getElementById('validezText').textContent = val; }
+
+  // ── UNIQUE CODE GENERATOR ──
+  function generateCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sin I,O,0,1 para evitar confusión
+    const timestamp = Date.now().toString(36).toUpperCase().slice(-4);
+    let random = '';
+    for (let i = 0; i < 4; i++) {
+      random += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const code = 'JG-' + timestamp + random;
+    document.getElementById('codeText').textContent = code;
+    document.getElementById('codeInput').value = code;
+    return code;
+  }
+
+  function copyCode() {
+    const code = document.getElementById('codeInput').value;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(() => {
+        showCopyToast();
+      });
+    } else {
+      const inp = document.getElementById('codeInput');
+      inp.select();
+      document.execCommand('copy');
+      showCopyToast();
+    }
+  }
+
+  function showCopyToast() {
+    const t = document.getElementById('toast');
+    t.textContent = '✓ Código copiado al portapapeles';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  // Auto-generate code on load
+  generateCode();
 
   // Auto expiry date 6 months from today
   (function() {
