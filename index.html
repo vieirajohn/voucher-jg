@@ -87,6 +87,22 @@
   }
   .btn-pdf:active { opacity: 0.75; }
 
+  .btn-img {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6e8ea8, #80a0c9);
+    border: none;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 400;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: opacity 0.2s;
+  }
+  .btn-img:active { opacity: 0.75; }
+
   .btn-wa {
     padding: 10px 18px;
     background: #25D366;
@@ -331,6 +347,7 @@
 <div class="topbar">
   <div class="topbar-title">Jeniffer Gonzaga · Voucher</div>
   <div class="topbar-right">
+    <button class="btn-img" onclick="saveAsImage()">🖼 Guardar Imagen</button>
     <button class="btn-pdf" onclick="window.print()">⬇ Guardar PDF</button>
     <button class="btn-wa" onclick="openWaModal()">📲 WhatsApp</button>
   </div>
@@ -469,6 +486,23 @@
 
   // Auto-generate code on load
   generateCode();
+
+  // Save voucher as image
+  async function saveAsImage() {
+    document.getElementById('generating').classList.add('show');
+    try {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+      const voucher = document.querySelector('.voucher');
+      const canvas = await html2canvas(voucher, { scale: 3, useCORS: true, backgroundColor: '#faf7f2' });
+      const link = document.createElement('a');
+      link.download = 'voucher-jg-' + document.getElementById('codeText').textContent + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch(err) {
+      alert('Error al generar imagen: ' + err.message);
+    }
+    document.getElementById('generating').classList.remove('show');
+  }
 
   // Auto expiry date 6 months from today
   (function() {
